@@ -1,30 +1,19 @@
 const express = require("express");
 const cors = require("cors");
+const { uuid } = require("uuidv4");
 
-// const { uuid } = require("uuidv4");
+// Import route files
+const repositoryRouter = require("./routes/repository.routes");
 
 const app = express();
 
+// Body Parser
 app.use(express.json());
+// Enable CORS
 app.use(cors());
 
-const repositories = [];
-
-app.get("/repositories", (request, response) => {
-  // TODO
-});
-
-app.post("/repositories", (request, response) => {
-  // TODO
-});
-
-app.put("/repositories/:id", (request, response) => {
-  // TODO
-});
-
-app.delete("/repositories/:id", (request, response) => {
-  // TODO
-});
+// Mount routers
+app.use("/repositories", repositoryRouter);
 
 app.post("/repositories/:id/like", (request, response) => {
   // TODO
