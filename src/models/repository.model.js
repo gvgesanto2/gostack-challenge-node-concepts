@@ -1,45 +1,18 @@
-const fs = require("fs").promises;
 const path = require("path");
 
-const { uuid } = require("uuidv4");
+const { uuid, isUuid } = require("uuidv4");
+
+const { readJsonFile, writeJsonFile } = require("../utils/file.utils");
 
 const reposFilePath = path.join(__dirname, "..", "data", "repositories.json");
 
-const readJsonFile = async (filePath) => {
-  try {
-    const fileContent = await fs.readFile(filePath);
-
-    return JSON.parse(fileContent);
-  } catch (error) {
-    console.log(error);
-  }
-};
-
-const writeJsonFile = async (filePath, data) => {
-  try {
-    await fs.writeFile(filePath, JSON.stringify(data));
-  } catch (error) {
-    console.log(error);
-  }
-};
-
-const repos = [
-  {
-    id: "9c989a09-8820-40e1-8611-228e7d7db276",
-    title: "test1",
-    url: "http://test1.com",
-    techs: ["test1"],
-    likes: 0,
-  },
-];
-
 class Repository {
-  constructor(title, url, techs) {
-    this.id = uuid();
-    this.title = title;
-    this.url = url;
-    this.techs = techs;
-    this.likes = 0;
+  constructor({ id, title, url, techs, likes }) {
+    this.id = isUuid(id) ? id : uuid();
+    this.title = title || "";
+    this.url = url || "";
+    this.techs = techs || [];
+    this.likes = likes || 0;
   }
 
   async save() {
@@ -58,8 +31,45 @@ class Repository {
     await writeJsonFile(reposFilePath, repositories);
   }
 
+  update({ title, url, techs }) {
+    this.title = title || this.title;
+    this.url = url || this.url;
+    this.techs = techs || this.techs;
+  }
+
+  async updateAndSave(updatedAttributes) {
+    this.update(updatedAttributes);
+    await this.save();
+  }
+
+  incrementLikes() {
+    this.likes++;
+  }
+
+  async remove() {
+    const repositories = await readJsonFile(reposFilePath);
+
+    const remainingRepositories = repositories.filter(
+      (repo) => repo.id !== this.id
+    );
+
+    await writeJsonFile(reposFilePath, remainingRepositories);
+  }
+
+  static async removeAll() {
+    await writeJsonFile(reposFilePath, []);
+  }
+
   static async fetchAll() {
     return await readJsonFile(reposFilePath);
+  }
+
+  static async findById(repositoryId) {
+    const repositories = await readJsonFile(reposFilePath);
+
+    const repo = repositories.find((repo) => repo.id === repositoryId);
+
+    return repo ? new Repository(repo) : repo;
   }
 }
 

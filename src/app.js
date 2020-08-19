@@ -1,6 +1,7 @@
 const express = require("express");
 const cors = require("cors");
-const { uuid } = require("uuidv4");
+
+const errorHandler = require("./middleware/errorHandler");
 
 // Import route files
 const repositoryRouter = require("./routes/repository.routes");
@@ -15,8 +16,7 @@ app.use(cors());
 // Mount routers
 app.use("/repositories", repositoryRouter);
 
-app.post("/repositories/:id/like", (request, response) => {
-  // TODO
-});
+// Error handler
+app.use(errorHandler);
 
 module.exports = app;
